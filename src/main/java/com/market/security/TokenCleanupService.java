@@ -23,7 +23,7 @@ public class TokenCleanupService {
     public void deleteOldTokens() {
         LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(5);
         tokenRepository.deleteTokensOlderThan(fiveMinutesAgo);
-        System.out.println("🧹 Deleted tokens older than 5 minutes at: " + LocalDateTime.now());
+//        System.out.println("🧹 Deleted tokens older than 5 minutes at: " + LocalDateTime.now());
     }
 }
 

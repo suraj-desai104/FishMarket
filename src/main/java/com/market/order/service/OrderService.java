@@ -125,7 +125,7 @@ public class OrderService {
      */
     private void notifyDeliveryBoys(Order order) {
         // TODO: implement route-based delivery boy notification
-        System.out.println("Notifying eligible delivery boys for order id: " + order.getId());
+//        System.out.println("Notifying eligible delivery boys for order id: " + order.getId());
     }
 
     // Fetch orders by user

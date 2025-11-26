@@ -19,6 +19,6 @@ public class TwilioConfig {
     @PostConstruct
     public void initTwilio() {
         Twilio.init(accountSid, authToken);
-        System.out.println("✅ Twilio Initialized Successfully");
+//        System.out.println("✅ Twilio Initialized Successfully");
     }
 }

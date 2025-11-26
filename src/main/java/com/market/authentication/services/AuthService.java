@@ -97,14 +97,14 @@ public class AuthService {
 	            .orElseThrow(() -> new RuntimeException("User not found"));
 
 	    // ✅ Validate encoded password
-	    System.out.println(request.getUsernameOrPhone());
-	    System.out.println(user.getPasswordHash());
-	    System.out.println(passwordEncoder.matches(request.getPassword(), user.getPasswordHash()));
+//	    System.out.println(request.getUsernameOrPhone());
+//	    System.out.println(user.getPasswordHash());
+//	    System.out.println(passwordEncoder.matches(request.getPassword(), user.getPasswordHash()));
 	    if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
 	        throw new RuntimeException("Invalid credentials");
 	    }
 
-	    System.out.println(user.getRole().name());
+//	    System.out.println(user.getRole().name());
 	    // ✅ Generate JWT Token with role
 	    String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
 
@@ -198,10 +198,10 @@ public class AuthService {
 	        usersRepository.save(user);
 
 	        // ✅ Now delete token safely
-	        System.out.println("Will delete token id=" + rs.getId() + ", exists? " + tokenRepository.existsById(rs.getId()));
+//	        System.out.println("Will delete token id=" + rs.getId() + ", exists? " + tokenRepository.existsById(rs.getId()));
 	        tokenRepository.deleteToken(token);
 	        tokenRepository.flush(); // ensures immediate DELETE query
-	        System.out.println("After delete, exists? " + tokenRepository.existsById(rs.getId()));
+//	        System.out.println("After delete, exists? " + tokenRepository.existsById(rs.getId()));
 
 	        return ResponseEntity.ok(Map.of(
 	            "message", "Password changed successfully",

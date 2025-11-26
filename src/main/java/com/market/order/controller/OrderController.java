@@ -38,7 +38,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<?> placeOrder(@RequestBody OrderDto orderdto) {
 
-    	System.out.println("********************");
+//    	System.out.println("********************");
         if (orderdto.getUserId() == null || orderdto.getPaymentMethod() == null ) {
             return ResponseEntity.badRequest().body("userId, paymentMethod and addressId are required!");
         }
@@ -49,7 +49,7 @@ public class OrderController {
             order.setPaymentMethod(orderdto.getPaymentMethod());
             order.setDeliveryBoyAssigned(orderdto.isDeliveryBoyAssigned());
 
-            System.out.println(orderdto.getAddressId());
+//            System.out.println(orderdto.getAddressId());
             // Calculate totalAmount from cart
             BigDecimal totalAmount = orderService.calculateTotalAmount(order.getUserId());
             order.setTotalAmount(totalAmount);
@@ -57,11 +57,11 @@ public class OrderController {
 
             // Set delivery address
             Users user = usersRepository.findById(orderdto.getUserId()).orElseThrow();
-            System.out.println(user.getEmail());
+//            System.out.println(user.getEmail());
             order.setDeliveryAddress(usersRepository.findById(orderdto.getUserId()).get().getDefaultAddress());
 
             if (order.getDeliveryAddress()==null) {
-            	System.out.println("+++++++++++++++++++++");
+//            	System.out.println("+++++++++++++++++++++");
             	 return ResponseEntity.badRequest().body("Please Enter Adrees address is require !");
             }
             Order savedOrder = orderService.placeOrder(order);
