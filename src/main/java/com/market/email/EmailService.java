@@ -61,7 +61,7 @@ public class EmailService {
 	    request.setMethod(Method.POST);
 	    request.setEndpoint("mail/send");
 	    request.setBody(mail.build());
-
+System.out.println(otp);
 	    sg.api(request);
 	}
 
