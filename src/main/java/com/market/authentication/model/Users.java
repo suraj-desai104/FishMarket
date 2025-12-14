@@ -70,7 +70,18 @@ public class Users {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private ResetToken resetToken;
     
-    @OneToOne
+    @Column(name = "delivery_pin")
+    private String deliveryPinHash;
+    
+    public String getDeliveryPinHash() {
+		return deliveryPinHash;
+	}
+
+	public void setDeliveryPinHash(String deliveryPinHash) {
+		this.deliveryPinHash = deliveryPinHash;
+	}
+
+	@OneToOne
     @JsonManagedReference
     @JoinColumn(name = "default_address_id") // This column will store the FK of Address
     private Address defaultAddress;

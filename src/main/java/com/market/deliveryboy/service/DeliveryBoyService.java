@@ -8,8 +8,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.market.deliveryboy.dto.DeliveryVerifyPinRequest;
 import com.market.deliveryboy.dto.DeliveryverifyOtp;
 import com.market.deliveryboy.model.DeliveryBoy;
 import com.market.deliveryboy.repository.DeliveryBoyRepository;
@@ -40,6 +42,9 @@ public class DeliveryBoyService {
     
     @Autowired
     private OrderItemRepository orderItemRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 	 @Value("${twilio.service-sid}")
 	    private String twilioServiceSid;
@@ -168,5 +173,58 @@ try {
         return deliveryBoyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
     }
+    
+    
+    
+  
+
+    public ResponseEntity<?> verifyDeliveryPin(DeliveryverifyOtp request) {
+
+        // 1️⃣ Validate request
+        if (request.getOrderId() == null || request.getOtp() == null) {
+            return ResponseEntity.badRequest().body("OrderId and PIN are required");
+        }
+
+        // 2️⃣ Fetch order
+        Order order = orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // 3️⃣ Check delivery boy assignment
+        if (!order.getDeliveryBoyId().equals(request.getDeliveryBoyId())) {
+            return ResponseEntity.badRequest().body("Delivery boy not assigned to this order");
+        }
+
+        // 4️⃣ Fetch user
+        Users user = usersRepository.findById(order.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 5️⃣ Check PIN
+        if (user.getDeliveryPinHash() == null) {
+            return ResponseEntity.badRequest().body("User has not set delivery PIN");
+        }
+
+        if (!passwordEncoder.matches(request.getOtp(), user.getDeliveryPinHash())) {
+            return ResponseEntity.badRequest().body("Invalid delivery PIN");
+        }
+
+        // 6️⃣ Update order status
+        order.setStatus("DELIVERED");
+        orderRepository.save(order);
+
+        // 7️⃣ Update order items
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
+        for (OrderItem item : orderItems) {
+            item.setDelivered(true);
+            orderItemRepository.save(item);
+        }
+
+        // 8️⃣ Response
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Order delivered successfully");
+        response.put("orderId", order.getId());
+
+        return ResponseEntity.ok(response);
+    }
+
 
 }

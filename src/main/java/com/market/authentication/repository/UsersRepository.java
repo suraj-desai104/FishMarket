@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.market.authentication.enums.Role;
 import com.market.authentication.model.Users;
+import com.market.email.EmailOtp;
 
 public interface UsersRepository extends JpaRepository<Users, Long> {
 	
@@ -30,6 +31,10 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     
     @Query("select u from Users u where u.username = ?1OR u.passwordHash= ?1")
     Optional<Users> findByUsernameOrPhoneNumber(String input);
+
+	Optional<Users> findByEmail(String email);
+
+
 
 
 

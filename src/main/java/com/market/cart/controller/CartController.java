@@ -27,6 +27,7 @@ public class CartController {
     // ➤ Add product to cart
     @PostMapping("/add")
     public CartItem addToCart(@RequestBody AddToCartRequest request) {
+    	System.out.println(request.getUserId());
         return cartService.addToCart(
                 request.getUserId(),
                 request.getProductId(),

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.market.product.model.Product;
 import com.market.product.service.CategoryService;
 import com.market.product.service.ProductService;
@@ -55,11 +56,30 @@ public class ProductController {
     }
 
     // ✅ Update Product by slug
-    @PutMapping("/{slug}")
-    public ResponseEntity<Product> updateProduct(@PathVariable String slug, @RequestBody Product updatedProduct) {
-        Product product = productService.updateProduct(slug, updatedProduct);
-        return ResponseEntity.ok(product);
-    }
+    @PutMapping(
+    	    value = "/{slug}",
+    	    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    	)
+    	public ResponseEntity<Product> updateProduct(
+    	        @PathVariable String slug,
+    	        @RequestPart("product") String productJson,
+    	        @RequestPart(value = "image", required = false) MultipartFile imageFile
+    	) throws Exception {
+
+    	    // Convert JSON string to Product object
+    	    ObjectMapper mapper = new ObjectMapper();
+    	    Product updatedProduct = mapper.readValue(productJson, Product.class);
+
+    	    // Upload image if present
+    	    if (imageFile != null && !imageFile.isEmpty()) {
+    	        String imageUrl = categoryService.uploadToSupabaseS3(imageFile);
+    	        updatedProduct.setImageUri(imageUrl);
+    	    }
+
+    	    Product product = productService.updateProduct(slug, updatedProduct);
+    	    return ResponseEntity.ok(product);
+    	}
+
 
     // ✅ Delete Product by slug
     @DeleteMapping("/{slug}")

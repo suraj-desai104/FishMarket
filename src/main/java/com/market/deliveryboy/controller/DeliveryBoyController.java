@@ -206,6 +206,7 @@ public class DeliveryBoyController {
     	if (request.getOrderId() == null || request.getDeliveryBoyId() == null || request.getOtp() == null) {
             return ResponseEntity.badRequest().body("orderId, deliveryBoyId and otp are required!");
         }
-    	return deliveryBoyService.verifyDeliveryOtp(request);
+//    	return deliveryBoyService.verifyDeliveryOtp(request);
+    	return deliveryBoyService.verifyDeliveryPin(request);
     }
 }

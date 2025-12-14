@@ -17,6 +17,7 @@ import com.market.address.AssignAddressDto;
 import com.market.authentication.dto.ForgotPasswordRequestDTO;
 import com.market.authentication.dto.LoginRequest;
 import com.market.authentication.dto.ResetPasswordDTO;
+import com.market.authentication.dto.SetDeliveryPinRequest;
 import com.market.authentication.dto.UserRegistrationConfirm;
 import com.market.authentication.dto.UserRegistrationRequest;
 import com.market.authentication.dto.VerifyOtpRequestDTO;
@@ -109,11 +110,11 @@ public class AuthService {
 	    String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
 
 
-	    Map<String, String> response = new HashMap();
+	    Map<String, Object> response = new HashMap();
 	    response.put("token", token);
 	    response.put("role", user.getRole().name());
 	    response.put("username", user.getUsername());
-	    response.put("userId", user.getUserId()+"");
+	    response.put("userId", user.getUserId());
 
 	    return ResponseEntity.ok(response);
 	}
@@ -185,8 +186,8 @@ public class AuthService {
 	@Transactional
 	public ResponseEntity<?> resetPassword(ResetPasswordDTO dto, String token) {
 
+		System.out.println(token);
 	    ResetToken rs = tokenRepository.findByJwtToken(token).orElseThrow();
-
 	    if (rs != null) {
 	        Users user = usersRepository.findById(rs.getUser().getUserId()).orElseThrow();
 
@@ -225,5 +226,26 @@ public class AuthService {
 
         return usersRepository.save(user);
     }
+	
+	 public ResponseEntity<?> setDeliveryPin(SetDeliveryPinRequest dto) {
 
+	        // STEP 1: Find user
+	        Users user = usersRepository.findByUsername(dto.getUsername())
+	                .orElseThrow(() -> new RuntimeException("User not found"));
+
+	        // STEP 2: Encode PIN (CRITICAL)
+	        String encodedPin = passwordEncoder.encode(dto.getPin());
+
+	        // STEP 3: Save encoded PIN
+	        user.setDeliveryPinHash(encodedPin);
+	        usersRepository.save(user);
+
+	        // STEP 4: Response
+	        return ResponseEntity.ok(
+	                Map.of(
+	                        "message", "Delivery PIN set successfully",
+	                        "username", user.getUsername()
+	                )
+	        );
+	 }
 }
