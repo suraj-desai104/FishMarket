@@ -1,5 +1,6 @@
 package com.market.authentication.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class AuthController {
 
     // User Registration Endpoint
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRegistrationRequest request) {
+    public ResponseEntity<?> registerUser(@RequestBody UserRegistrationRequest request) throws IOException {
 //        return authService.sendOtp(request.getPhoneNumber());
     	
     	return  emailService.sendSignupOtp(request.getEmail());
@@ -56,7 +57,7 @@ public class AuthController {
     
   
     @PostMapping("/forgot")
-    public ResponseEntity<?> forgetPass(@RequestBody ForgotPasswordRequestDTO forgotPasswordRequestDTO){
+    public ResponseEntity<?> forgetPass(@RequestBody ForgotPasswordRequestDTO forgotPasswordRequestDTO) throws IOException{
     	
     	Users user=usersRepository.findByUsernameOrPhoneNumber(forgotPasswordRequestDTO.getUsernameOrPhone()).orElseThrow();
     	    	 
