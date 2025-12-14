@@ -87,6 +87,12 @@
     </dependency>
 
 <dependency>
+    <groupId>com.sendgrid</groupId>
+    <artifactId>sendgrid-java</artifactId>
+    <version>4.10.2</version>
+</dependency>
+
+<dependency>
       <groupId>com.razorpay</groupId>
       <artifactId>razorpay-java</artifactId>
       <version>1.4.8</version> <!-- check latest version if needed -->

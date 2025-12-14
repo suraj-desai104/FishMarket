@@ -7,8 +7,12 @@ import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import com.sendgrid.*;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+
+import java.io.IOException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +29,8 @@ import jakarta.transaction.Transactional;
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+//    @Autowired
+//    private JavaMailSender mailSender;
     
     @Autowired
     private EmailOtpRepository emailOtpRepository;
@@ -44,20 +48,25 @@ public class EmailService {
 	private ResetTokenRepository tokenRepository;
 	
 
-    public void sendOtp(String email, String otp) {
+	
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("Account Verification OTP");
-        message.setText(
-            "Your OTP is: " + otp +
-            "\nValid for 5 minutes.\nDo not share it."
-        );
+	public void sendOtp(String to, String otp) throws IOException {
+	    Email from = new Email("verified_email@gmail.com");
+	    Email toEmail = new Email(to);
+	    Content content = new Content("text/plain", "Your OTP is: " + otp);
+	    Mail mail = new Mail(from, "Your OTP", toEmail, content);
 
-        mailSender.send(message);
-    }
+	    SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
+	    Request request = new Request();
+	    request.setMethod(Method.POST);
+	    request.setEndpoint("mail/send");
+	    request.setBody(mail.build());
+
+	    sg.api(request);
+	}
+
     
-    public ResponseEntity<?> sendSignupOtp(String email) {
+    public ResponseEntity<?> sendSignupOtp(String email) throws IOException {
 
         String otp = String.valueOf(100000 + new Random().nextInt(900000));
 
@@ -110,7 +119,7 @@ public class EmailService {
     }
 
     
-    public ResponseEntity<?> sendForgotPasswordOtp(String email) {
+    public ResponseEntity<?> sendForgotPasswordOtp(String email) throws IOException {
 
         // 1. Check user exists
         Users user = usersRepository.findByEmail(email)
