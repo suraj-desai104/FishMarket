@@ -32,6 +32,20 @@ public class AuthController {
     
     @Autowired
     private EmailService emailService;
+    
+    @PostMapping("/send")
+    public String sendEmail(@RequestParam String email) {
+
+        String otp = String.valueOf(100000 + (int)(Math.random() * 900000));
+
+        emailService.sendOtp(
+            email,
+            "Your OTP - FishMart",
+            "Your OTP is: " + otp + "\nValid for 5 minutes."
+        );
+
+        return "Email sent successfully";
+    }
 
     // User Registration Endpoint
     @PostMapping("/register")

@@ -6,7 +6,9 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
@@ -48,22 +50,39 @@ public class EmailService {
 	private ResetTokenRepository tokenRepository;
 	
 
-	
+	@Autowired
+	 private  SendGrid sendGrid;
 
-	public void sendOtp(String to, String otp) throws IOException {
-	    Email from = new Email("verified_email@gmail.com");
-	    Email toEmail = new Email(to);
-	    Content content = new Content("text/plain", "Your OTP is: " + otp);
-	    Mail mail = new Mail(from, "Your OTP", toEmail, content);
+	    @Value("${sendgrid.from.email}")
+	    private String fromEmail;
 
-	    SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
-	    Request request = new Request();
-	    request.setMethod(Method.POST);
-	    request.setEndpoint("mail/send");
-	    request.setBody(mail.build());
-System.out.println(otp);
-	    sg.api(request);
-	}
+	    @Value("${sendgrid.from.name}")
+	    private String fromName;
+
+	   
+
+	    public void sendOtp(String to, String subject, String body) {
+
+	        try {
+	            Email from = new Email(fromEmail, fromName);
+	            Email toEmail = new Email(to);
+	            Content content = new Content("text/plain", body);
+
+	            Mail mail = new Mail(from, subject, toEmail, content);
+
+	            Request request = new Request();
+	            request.setMethod(Method.POST);
+	            request.setEndpoint("mail/send");
+	            request.setBody(mail.build());
+
+	            Response response = sendGrid.api(request);
+
+	            System.out.println("SendGrid Status Code: " + response.getStatusCode());
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
 
     
     public ResponseEntity<?> sendSignupOtp(String email) throws IOException {
@@ -77,10 +96,11 @@ System.out.println(otp);
         emailOtp.setEmail(email);
         emailOtp.setOtp(otp);
         emailOtp.setExpiryTime(LocalDateTime.now().plusMinutes(5));
-
-        emailOtpRepository.save(emailOtp);
-        sendOtp(email, otp);
-
+System.out.println(emailOtp.getOtp());
+        EmailOtp e= emailOtpRepository.save(emailOtp);
+        sendOtp(email, "Your OTP - FishMart",
+                "Your OTP is: " + otp + "\nValid for 5 minutes.");
+System.out.println(e.getOtp());
         return ResponseEntity.ok("OTP sent to email");
     }
     @Transactional
@@ -146,7 +166,8 @@ System.out.println(otp);
         emailOtpRepository.save(emailOtp);
 
         // 5. Send email
-        sendOtp(email, otp);
+        sendOtp(email, "Your OTP - FishMart",
+                "Your OTP is: " + otp + "\nValid for 5 minutes.");
 
         return ResponseEntity.ok("OTP sent to registered email");
     }
